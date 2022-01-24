@@ -101,7 +101,7 @@
     let markerLayers;
     let lineLayers;
     let trackLayers;
-    let zoomLevel;
+    let zoomLevel = 1;
     let wmsLayer;
     let myStyle = {
         "color": "#ff0000",
@@ -146,17 +146,6 @@
         };
     }
 
-    $: if(markerLayers && map && zoomLevel) {
-        if(zoomLevel < 11) {
-            markerLayers.addTo(map);
-            trackLayers.remove();
-        } else {
-            markerLayers.remove();
-            trackLayers.addTo(map);
-            console.log(zoomLevel)
-        }
-    }
-
     $: if(wmsLayer && map) {
         if(eye) {
             wmsLayer.addTo(map);
@@ -165,9 +154,21 @@
         }
     }
 
-    $: if(trackLayers && map) {
-        if(lines) {}
-        else {}
+    $: if((trackLayers || markerLayers) && map && zoomLevel) {
+        if(lines) {
+            if(zoomLevel < 11) {
+                markerLayers.addTo(map);
+                trackLayers.remove();
+            }
+            else {
+                markerLayers.remove();
+                trackLayers.addTo(map);
+            }
+        }
+        else {
+            trackLayers.remove();
+            markerLayers.remove();
+        }
     }
 
     function resizeMap() {
