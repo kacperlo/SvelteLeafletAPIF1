@@ -24,6 +24,33 @@
         return m;
     }
 
+    let eye = true;
+    let lines = true;
+
+    let toolbar = L.control({ position: 'topright' });
+    let toolbarComponent;
+    toolbar.onAdd = (map) => {
+        let div = L.DomUtil.create('div');
+        toolbarComponent = new MapToolbar({
+            target: div,
+            props: {}
+        });
+
+        toolbarComponent.$on('click-eye', ({ detail }) => eye = detail);
+        toolbarComponent.$on('click-lines', ({ detail }) => {lines = detail });
+        toolbarComponent.$on('click-reset', () => {
+            map.setView(initialView, initialZoom, { animate: true })
+        })
+        return div;
+    }
+
+    toolbar.onRemove = () => {
+        if(toolbarComponent) {
+            toolbarComponent.$destroy();
+            toolbarComponent = null;
+        }
+    };
+
     function bindPopup(marker, createFn) {
         let popupComponent;
         marker.bindPopup(() => {
@@ -44,8 +71,6 @@
             }
         });
     }
-
-    let markers = new Map();
 
     function markerIcon() {
         let html = `<div class="map-marker">${markerIcons.library}</div>`;
@@ -74,7 +99,10 @@
     }
 
     let markerLayers;
+    let lineLayers;
     let trackLayers;
+    let zoomLevel;
+    let wmsLayer;
     let myStyle = {
         "color": "#ff0000",
         "weight": 4,
@@ -82,6 +110,21 @@
 
     function mapAction(container) {
         map = createMap(container);
+
+        map.on('zoomend', function() {
+            zoomLevel = map._zoom
+        });
+
+        toolbar.addTo(map);
+
+        wmsLayer = L.tileLayer.wms('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+            layers: 'Dynamiczna-hipsometria'
+        }).addTo(map);
+
+        let myStyle = {
+            "color": "#ff0000",
+            "weight": 4,
+        };
 
         trackLayers = L.layerGroup()
         let tracks = L.geoJson(tracksShapes, { style: myStyle })
@@ -93,12 +136,43 @@
             markerLayers.addLayer(m);
         }
         markerLayers.addTo(map);
+
+        return {
+            destroy: () => {
+                toolbar.remove();
+                map.remove();
+                map = null;
+            }
+        };
+    }
+
+    $: if(markerLayers && map && zoomLevel) {
+        if(zoomLevel < 11) {
+            markerLayers.addTo(map);
+            trackLayers.remove();
+        } else {
+            markerLayers.remove();
+            trackLayers.addTo(map);
+            console.log(zoomLevel)
+        }
+    }
+
+    $: if(wmsLayer && map) {
+        if(eye) {
+            wmsLayer.addTo(map);
+        } else {
+            wmsLayer.remove();
+        }
+    }
+
+    $: if(trackLayers && map) {
+        if(lines) {}
+        else {}
     }
 
     function resizeMap() {
         if(map) { map.invalidateSize(); }
     }
-
 </script>
 
 <svelte:window on:resize={resizeMap} />
