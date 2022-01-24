@@ -3,6 +3,7 @@
     import MapToolbar from './MapToolbar.svelte';
     import MarkerPopup from './MarkerPopup.svelte';
     import * as markerIcons from './markers.js';
+    import tracksShapes from './tracks'
 
     let map;
 
@@ -73,10 +74,25 @@
     }
 
     let markerLayers;
+    let trackLayers;
+    let myStyle = {
+        "color": "#ff0000",
+        "weight": 4,
+    };
 
     function mapAction(container) {
         map = createMap(container);
+
+        trackLayers = L.layerGroup()
+        let tracks = L.geoJson(tracksShapes, { style: myStyle })
+        trackLayers.addLayer(tracks)
+
         markerLayers = L.layerGroup()
+        for(let track of tracksShapes.features) {
+            let m = createMarker([track.geometry.coordinates[0][1], track.geometry.coordinates[0][0]]);
+            markerLayers.addLayer(m);
+        }
+        markerLayers.addTo(map);
     }
 
     function resizeMap() {
