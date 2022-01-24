@@ -1,5 +1,8 @@
 <script>
     import L from 'leaflet';
+    import MapToolbar from './MapToolbar.svelte';
+    import MarkerPopup from './MarkerPopup.svelte';
+    import * as markerIcons from './markers.js';
 
     let map;
 
@@ -20,9 +23,62 @@
         return m;
     }
 
+    function bindPopup(marker, createFn) {
+        let popupComponent;
+        marker.bindPopup(() => {
+            let container = L.DomUtil.create('div');
+            popupComponent = createFn(container);
+            return container;
+        });
+
+        marker.on('popupclose', () => {
+            if(popupComponent) {
+                let old = popupComponent;
+                popupComponent = null;
+                // Wait to destroy until after the fadeout completes.
+                setTimeout(() => {
+                    old.$destroy();
+                }, 500);
+
+            }
+        });
+    }
+
+    let markers = new Map();
+
+    function markerIcon() {
+        let html = `<div class="map-marker">${markerIcons.library}</div>`;
+        return L.divIcon({
+            html,
+            className: 'map-marker'
+        });
+    }
+
+    function createMarker(loc) {
+        let icon = markerIcon();
+        let marker = L.marker(loc, {icon});
+        bindPopup(marker, (m) => {
+            let c = new MarkerPopup({
+                target: m,
+            });
+
+            c.$on('change', ({detail}) => {
+                marker.setIcon(markerIcon());
+            });
+
+            return c;
+        });
+
+        return marker;
+    }
+
+    let markerLayers;
+
     function mapAction(container) {
         map = createMap(container);
+        markerLayers = L.layerGroup()
     }
+
     function resizeMap() {
         if(map) { map.invalidateSize(); }
     }
@@ -32,6 +88,19 @@
 <svelte:window on:resize={resizeMap} />
 
 <style>
+    .map :global(.marker-text) {
+        width:100%;
+        text-align:center;
+        font-weight:600;
+        background-color:#444;
+        color:#EEE;
+        border-radius:0.5rem;
+    }
+
+    .map :global(.map-marker) {
+        width:30px;
+        transform:translateX(-90%) translateY(-30%) scale(0.5);
+    }
 </style>
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
