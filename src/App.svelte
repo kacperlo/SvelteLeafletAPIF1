@@ -26,6 +26,7 @@
 
     let eye = true;
     let lines = true;
+    let clouds = false;
 
     let toolbar = L.control({ position: 'topright' });
     let toolbarComponent;
@@ -38,6 +39,7 @@
 
         toolbarComponent.$on('click-eye', ({ detail }) => eye = detail);
         toolbarComponent.$on('click-lines', ({ detail }) => {lines = detail });
+        toolbarComponent.$on('click-clouds', ({ detail }) => {clouds = detail });
         toolbarComponent.$on('click-reset', () => {
             map.setView(initialView, initialZoom, { animate: true })
         })
@@ -103,6 +105,7 @@
     let trackLayers;
     let zoomLevel = 1;
     let wmsLayer;
+    let wmsWeatherLayer;
     let myStyle = {
         "color": "#ff0000",
         "weight": 4,
@@ -117,14 +120,15 @@
 
         toolbar.addTo(map);
 
-        wmsLayer = L.tileLayer.wms('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
-            layers: 'Dynamiczna-hipsometria'
+        wmsWeatherLayer = L.tileLayer.wms('https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=6f2438a5f710fca7fe64f7543f77ff2c', {
+            layers: 'Dynamiczna-hipsometria',
+            zIndex: 2
         }).addTo(map);
 
-        let myStyle = {
-            "color": "#ff0000",
-            "weight": 4,
-        };
+        wmsLayer = L.tileLayer.wms('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+            layers: 'Dynamiczna-hipsometria',
+            zIndex: 1,
+        }).addTo(map)
 
         trackLayers = L.layerGroup()
         let tracks = L.geoJson(tracksShapes, { style: myStyle })
@@ -151,6 +155,14 @@
             wmsLayer.addTo(map);
         } else {
             wmsLayer.remove();
+        }
+    }
+
+    $: if(wmsWeatherLayer && map) {
+        if(clouds) {
+            wmsWeatherLayer.addTo(map);
+        } else {
+            wmsWeatherLayer.remove();
         }
     }
 
@@ -198,3 +210,4 @@
       integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
       crossorigin=""/>
 <div class="map" style="height:100%; width:100%" use:mapAction />
+
