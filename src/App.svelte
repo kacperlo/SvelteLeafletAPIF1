@@ -6,6 +6,7 @@
     import tracksShapes from './tracks'
     import { onMount } from "svelte";
     import { apiData, races } from './store.js';
+    import Sidebar from "./Sidebar.svelte";
 
     let map;
 
@@ -220,10 +221,21 @@
         width:30px;
         transform:translateX(-90%) translateY(-30%) scale(0.5);
     }
+    .body {
+        position:relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction:row;
+    }
 </style>
 
-<link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-      integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-      crossorigin=""/>
-<div class="map" style="height:100%; width:100%" use:mapAction />
+<div class="body">
+    <Sidebar/>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+          crossorigin=""/>
+    <div class="map" style="height:100%; width:100%" use:mapAction />
+</div>
+
 
