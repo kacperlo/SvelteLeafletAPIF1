@@ -100,6 +100,8 @@
         let icon = markerIcon();
         let marker = L.marker(loc, {icon});
         bindPopup(marker, (m) => {
+            map.flyTo(loc, 15, {animate: false, duration: 1})
+
             let c = new MarkerPopup({
                 target: m,
             });
