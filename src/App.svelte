@@ -4,8 +4,22 @@
     import MarkerPopup from './MarkerPopup.svelte';
     import * as markerIcons from './markers.js';
     import tracksShapes from './tracks'
+    import { onMount } from "svelte";
+    import { apiData, races } from './store.js';
 
     let map;
+
+    onMount(async () => {
+        fetch("http://ergast.com/api/f1/2022.json")
+            .then(response => response.json())
+            .then(data => {
+                console.log(data.MRData.RaceTable.Races);
+                apiData.set(data);
+            }).catch(error => {
+            console.log(error);
+            return [];
+        });
+    });
 
     const initialView = [10, 0];
     const initialZoom = 3;
