@@ -1,7 +1,6 @@
 <script>
     import L from 'leaflet';
     import MapToolbar from './MapToolbar.svelte';
-    import MarkerPopup from './MarkerPopup.svelte';
     import * as markerIcons from './markers.js';
     import tracksShapes from './f1-tracks'
     import { onMount } from "svelte";
@@ -102,16 +101,8 @@
         let marker = L.marker(loc, {icon});
         bindPopup(marker, (m) => {
             map.flyTo(loc, 15, {animate: false, duration: 1})
-
-            let c = new MarkerPopup({
-                target: m,
-            });
-
-            c.$on('change', ({detail}) => {
-                marker.setIcon(markerIcon());
-            });
-
-            return c;
+            activeRace.set(i)
+            popup = true
         });
 
         return marker;
