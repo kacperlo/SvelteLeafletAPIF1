@@ -4,17 +4,21 @@
     import * as markerIcons from './markers.js';
     import tracksShapes from './f1-tracks'
     import { onMount } from "svelte";
-    import { apiData, races } from './store.js';
+    import { apiData, activeRace } from './store.js';
     import Sidebar from "./Sidebar.svelte";
     import Popup from "./Popup.svelte";
 
     let map;
+    let eye = true;
+    let lines = true;
+    let clouds = false;
+
+    let popup = false
 
     onMount(async () => {
         fetch("http://ergast.com/api/f1/2022.json")
             .then(response => response.json())
             .then(data => {
-                console.log(data.MRData.RaceTable.Races);
                 apiData.set(data);
             }).catch(error => {
             console.log(error);
@@ -22,13 +26,13 @@
         });
     });
 
-    const initialView = [10, 0];
+    const initialView = [20, 20];
     const initialZoom = 3;
 
     function createMap(container) {
         let m = L.map(container, {preferCanvas: true }).setView(initialView, initialZoom);
         L.tileLayer(
-            'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+            'https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png',
             {
                 attribution: `&copy;<a href="https://www.openstreetmap.org/copyright" target="_blank">OpenStreetMap</a>,
 	        &copy;<a href="https://carto.com/attributions" target="_blank">CARTO</a>`,
@@ -38,10 +42,6 @@
         ).addTo(m);
         return m;
     }
-
-    let eye = true;
-    let lines = true;
-    let clouds = false;
 
     let toolbar = L.control({ position: 'topright' });
     let toolbarComponent;
@@ -80,11 +80,9 @@
             if(popupComponent) {
                 let old = popupComponent;
                 popupComponent = null;
-                // Wait to destroy until after the fadeout completes.
                 setTimeout(() => {
                     old.$destroy();
                 }, 500);
-
             }
         });
     }
@@ -97,15 +95,14 @@
         });
     }
 
-    function createMarker(loc) {
+    function createMarker(loc, i) {
         let icon = markerIcon();
         let marker = L.marker(loc, {icon});
-        bindPopup(marker, (m) => {
+        bindPopup(marker, () => {
             map.flyTo(loc, 15, {animate: false, duration: 1})
             activeRace.set(i)
             popup = true
         });
-
         return marker;
     }
 
@@ -122,22 +119,20 @@
 
     function mapAction(container) {
         map = createMap(container);
-
         map.on('zoomend', function() {
             zoomLevel = map._zoom
         });
 
         toolbar.addTo(map);
-
         wmsWeatherLayer = L.tileLayer.wms('https://tile.openweathermap.org/map/precipitation_new/{z}/{x}/{y}.png?appid=6f2438a5f710fca7fe64f7543f77ff2c', {
             layers: 'Dynamiczna-hipsometria',
             zIndex: 2
         }).addTo(map);
 
-        wmsLayer = L.tileLayer.wms('https://cartodb-basemaps-{s}.global.ssl.fastly.net/dark_all/{z}/{x}/{y}.png', {
+        wmsLayer = L.tileLayer.wms('https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png', {
             layers: 'Dynamiczna-hipsometria',
             zIndex: 1,
-        }).addTo(map)
+        })
 
         trackLayers = L.layerGroup()
         let tracks = L.geoJson(tracksShapes, { style: myStyle })
@@ -163,9 +158,9 @@
 
     $: if(wmsLayer && map) {
         if(eye) {
-            wmsLayer.addTo(map);
-        } else {
             wmsLayer.remove();
+        } else {
+            wmsLayer.addTo(map);
         }
     }
 
@@ -221,6 +216,7 @@
     .map :global(.map-marker) {
         width:30px;
         transform:translateX(-90%) translateY(-30%) scale(0.5);
+        animation: fadein 0.2s;
     }
     .body {
         position:relative;
@@ -228,6 +224,20 @@
         height: 100%;
         display: flex;
         flex-direction:row;
+        background-color: black;
+    }
+    .map {
+        background: #090909;
+        outline: 0;
+    }
+    @keyframes fadein {
+        from { opacity: 0; }
+        to   { opacity: 1; }
+    }
+    .map-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
     }
 </style>
 
