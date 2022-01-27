@@ -6,6 +6,7 @@
     import { onMount } from "svelte";
     import { apiData, races } from './store.js';
     import Sidebar from "./Sidebar.svelte";
+    import Popup from "./Popup.svelte";
 
     let map;
 
@@ -143,11 +144,13 @@
         trackLayers.addLayer(tracks)
 
         markerLayers = L.layerGroup()
-        for(let track of tracksShapes.features) {
-            let m = createMarker([track.geometry.coordinates[0][1], track.geometry.coordinates[0][0]]);
+        for (const race of tracksShapes.features) {
+            let m = createMarker([race.geometry.coordinates[0][1], race.geometry.coordinates[0][0]], race.properties.id);
             markerLayers.addLayer(m);
         }
         markerLayers.addTo(map);
+
+        map.on('click', () => popup = false);
 
         return {
             destroy: () => {
@@ -194,6 +197,13 @@
     function resizeMap() {
         if(map) { map.invalidateSize(); }
     }
+
+    function moveMap(event) {
+        popup = true
+        activeRace.set(event.detail.text.round)
+        map.flyTo([event.detail.text.Circuit.Location.lat, event.detail.text.Circuit.Location.long], 15, {animate: false, duration: 1})
+    }
+    const closePopup = () => popup = false;
 </script>
 
 <svelte:window on:resize={resizeMap} />
@@ -222,11 +232,16 @@
 </style>
 
 <div class="body">
-    <Sidebar/>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
-          integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
-          crossorigin=""/>
-    <div class="map" style="height:100%; width:100%" use:mapAction />
+    <Sidebar on:passLocation={moveMap}/>
+    <div class="map-container">
+        {#if popup === true}
+            <Popup on:close={closePopup}/>
+        {/if}
+        <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
+              integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
+              crossorigin=""/>
+        <div class="map" style="height:100%; width:100%" use:mapAction />
+    </div>
 </div>
 
 
