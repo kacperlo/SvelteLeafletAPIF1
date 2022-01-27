@@ -16,7 +16,7 @@
     let popup = false
 
     onMount(async () => {
-        fetch("http://ergast.com/api/f1/2022.json")
+        fetch("https://ergast.com/api/f1/2022.json")
             .then(response => response.json())
             .then(data => {
                 apiData.set(data);
@@ -250,7 +250,7 @@
         <link rel="stylesheet" href="https://unpkg.com/leaflet@1.6.0/dist/leaflet.css"
               integrity="sha512-xwE/Az9zrjBIphAcBb3F6JVqxf46+CDLwfLMHloNu6KEQCAWi6HcDUbeOfBIptF7tcCzusKFjFw2yuvEpDL9wQ=="
               crossorigin=""/>
-        <div class="map" style="height:100%; width:100%" use:mapAction />
+        <div class="map" style="height:100%; width:100%" use:mapAction></div>
     </div>
 </div>
 

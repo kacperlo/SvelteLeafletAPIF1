@@ -38,10 +38,9 @@
         top: 0;
         bottom: 0;
         left: 0;
-        right: -17px; /* Increase/Decrease this value for cross-browser compatibility */
+        right: -17px;
     }
     .logo {
-        /*margin-left: 20px;*/
         transform-origin: 0 0;
         margin: 40px 35px;
         transform: translateX(0) translateY(0) scale(1.9)
@@ -65,9 +64,6 @@
         color: white;
         margin: 20px;
         font-size: 12px;
-    }
-    .race {
-
     }
     .date {
         font-size: 20px;
@@ -101,18 +97,16 @@
 <div class="sidebar">
     <div class="panel">
         <div class="logo">{@html library}</div>
-            <div class="races">
-                <div class="white">
-                    {#each $races as race}
-                        <div class="slide button" on:click={() => {moveMap(race)}}>
-                            <div class="round">Round {race.round}</div>
-                            <h1>{race.Circuit.Location.country}</h1>
-                            <h3>{race.Circuit.circuitName}</h3>
-                            <div class="date">{race.date.slice(8, 10)} {getMonthFromNumber(parseInt(race.date.slice(5, 7)))}</div>
-                        </div>
-                        <hr class="solid">
-                    {/each}
+        <div class="white">
+            {#each $races as race}
+                <div class="slide button" on:click={() => {moveMap(race)}}>
+                    <div class="round">Round {race.round}</div>
+                    <h1>{race.Circuit.Location.country}</h1>
+                    <h3>{race.Circuit.circuitName}</h3>
+                    <div class="date">{race.date.slice(8, 10)} {getMonthFromNumber(parseInt(race.date.slice(5, 7)))}</div>
                 </div>
+                <hr class="solid">
+            {/each}
         </div>
     </div>
 </div>
