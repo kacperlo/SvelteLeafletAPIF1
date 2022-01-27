@@ -3,7 +3,7 @@
     import MapToolbar from './MapToolbar.svelte';
     import MarkerPopup from './MarkerPopup.svelte';
     import * as markerIcons from './markers.js';
-    import tracksShapes from './tracks'
+    import tracksShapes from './f1-tracks'
     import { onMount } from "svelte";
     import { apiData, races } from './store.js';
     import Sidebar from "./Sidebar.svelte";
