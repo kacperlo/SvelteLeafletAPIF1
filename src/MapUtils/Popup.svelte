@@ -1,15 +1,7 @@
 <script>
-    import { createEventDispatcher } from 'svelte';
-    import {races, activeRace} from './store.js';
+    import {races, activeRace, popup} from '../store.js';
 
-    const dispatch = createEventDispatcher();
-
-    function close() {
-        dispatch('close', {
-            text: close
-        });
-    }
-
+    const closePopup = () => $popup = false;
 
     let activeRaceValue = 0
     activeRace.subscribe(value => {
@@ -19,7 +11,6 @@
     function getMonthFromNumber(num){
         return "JanFebMarAprMayJunJulAugSepOctNovDec".slice(num * 3 - 3, num * 3)
     }
-
 </script>
 
 <style>
@@ -68,9 +59,8 @@
     }
 </style>
 
-
 <div class="popup">
-    <div class="cross" on:click={close}>x</div>
+    <div class="cross" on:click={closePopup}>x</div>
     {#if $races.length === 0}
         Loading...
     {:else}

@@ -1,9 +1,6 @@
 <script>
     import {library} from './markers.js';
-    import {races} from './store.js';
-    import { createEventDispatcher } from 'svelte';
-
-    const dispatch = createEventDispatcher();
+    import {races, popup, activeRace, map} from '../store.js';
 
     function moveMap(race) {
         let raceToPass = race
@@ -12,9 +9,9 @@
             raceToPass.Circuit.Location.long = 39.103768;
             raceToPass.Circuit.Location.lat = 21.634993;
         }
-        dispatch('passLocation', {
-            text: raceToPass
-        });
+        $popup = true
+        activeRace.set(raceToPass.round)
+        $map.flyTo([raceToPass.Circuit.Location.lat, raceToPass.Circuit.Location.long], 15, {animate: false, duration: 1})
     }
 
     function getMonthFromNumber(num){
@@ -44,9 +41,6 @@
         transform-origin: 0 0;
         margin: 40px 35px;
         transform: translateX(0) translateY(0) scale(1.9)
-    }
-    .races {
-        margin-top: 65px;
     }
     .round {
         color: #d74040;
@@ -83,8 +77,6 @@
     .button {
         transition: 0.25s;
     }
-
-
     .slide:hover,
     .slide:focus {
         box-shadow: inset 255px 0 0 0 rgba(255, 255, 255, 0.08);
